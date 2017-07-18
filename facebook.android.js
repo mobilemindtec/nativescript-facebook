@@ -341,6 +341,20 @@ var Facebook = function(){
 
     }
 
+    Facebook.invite = function(args){
+
+        if (com.facebook.share.widget.AppInviteDialog.canShow()) {
+            var content = new com.facebook.share.model.AppInviteContent.Builder()
+                        .setApplinkUrl(args.appLinkUrl)
+                        .setPreviewImageUrl(args.previewImageUrl)
+                        .build();
+            com.facebook.share.widget.AppInviteDialog.show(application.android.currentContext, content);
+            return true
+        }else{
+            return false
+        }        
+    }
+    
     return Facebook
 }
 
