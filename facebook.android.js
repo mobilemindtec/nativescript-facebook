@@ -9,48 +9,47 @@ var Facebook = function(){
         if (this._isInit) {
 
             var self = this
-            var previesResult = application.android.onActivityResult
-            application.android.onActivityResult = function (requestCode, resultCode, data) {
-                application.android.onActivityResult = previesResult
-                self.mCallbackManager.onActivityResult(requestCode, resultCode, data);
-            };
+            application.android.on("activityResult", function(eventData) {
+                self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+            })
 
             var javaPermissions = java.util.Arrays.asList(permissions || default_permissions);
             this.loginManager.logInWithPublishPermissions(this._act, javaPermissions);
         }
+
+        
     }
 
-    Facebook.logInWithReadPermissions = function(permissions) {
+    Facebook.logInWithReadPermissions = function(permissions){
         if (this._isInit) {
 
             var self = this
-            var previesResult = application.android.onActivityResult
-            application.android.onActivityResult = function (requestCode, resultCode, data) {
-                application.android.onActivityResult = previesResult
-                self.mCallbackManager.onActivityResult(requestCode, resultCode, data);
-            };
+
+            application.android.on("activityResult", function(eventData) {
+                self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+            })
 
             var javaPermissions = java.util.Arrays.asList(permissions || default_permissions);
             this.loginManager.logInWithReadPermissions(application.android.currentContext, javaPermissions);
         }
     }
 
-    Facebook.getAcessToken = function(){
+    Facebook.getAcessToken = function() {
         return com.facebook.AccessToken.getCurrentAccessToken();
     }
 
-    Facebook.isLoggedIn = function(){
+    Facebook.isLoggedIn = function() {
         return this.getAcessToken() != null
     }
 
 
-    Facebook.logout = function(){
+    Facebook.logout = function() {
         if(this._isInit){
             this.loginManager.logOut();
         }
     }
 
-    Facebook.initSdk = function(loginBehavior){
+    Facebook.initSdk = function(loginBehavior) {
 
         if(this._isInit)
             return true
@@ -101,7 +100,7 @@ var Facebook = function(){
     }
 
     // args = { fields, callback}
-    Facebook.requestUserProfile = function(args){
+    Facebook.requestUserProfile = function(args) {
 
         args.fields = args.fields || default_fileds
 
@@ -121,7 +120,7 @@ var Facebook = function(){
         })
     }
 
-    Facebook.requestBooks = function(args){
+    Facebook.requestBooks = function(args) {
 
         var fields = args.fields
         var callback = args.callback
@@ -132,7 +131,7 @@ var Facebook = function(){
         this.doGraphPathRequest({
           accessToken: accessToken,
           graphPath: graphPath,
-          function(graphResponse){
+          callback: function(graphResponse)  {
               var json = graphResponse.getJSONObject()
               var array = json.getJSONArray('data')
               var results = toJsonrray(array)
@@ -142,7 +141,7 @@ var Facebook = function(){
 
     }
 
-    Facebook.requestFriends = function(args){
+    Facebook.requestFriends = function(args) {
 
         var userId = args.userId
         var callback = args.callback
@@ -163,7 +162,7 @@ var Facebook = function(){
           accessToken: accessToken,
           graphPath: graphPath,
           bundle: bundle,
-          callback :function(graphResponse){
+          callback: function(graphResponse) {
               var json = graphResponse.getJSONObject()
               var array = json.getJSONArray('data')
               var results = toJsonrray(array)
@@ -177,7 +176,7 @@ var Facebook = function(){
     //url, title, content, imageUrl
     Facebook.share = function(params){
         try{
-            var activity = application.android.foregroundActivity
+            var activity = application.android.foregroundActivity || application.android.startActivity;
             var builder = new com.facebook.share.model.ShareLinkContent.Builder()
 
             if(params.url)
@@ -204,9 +203,9 @@ var Facebook = function(){
     // imagePath, content, imageUrl
     Facebook.sharePhoto = function(params){
         try{
-            var activity = application.android.foregroundActivity
+            var activity = application.android.foregroundActivity || application.android.startActivity;
 
-            var builder = new com.facebook.share.model.SharePhotoContent().Builder()
+            var builder = new com.facebook.share.model.SharePhotoContent.Builder()
             var photo = this.createPhotoShare(params)
             var content = builder.addPhoto(photo).build();
 
@@ -220,9 +219,9 @@ var Facebook = function(){
     // list of {imagePath, content, imageUrl}
     Facebook.sharePhotos = function(args){
         try{
-            var activity = application.android.foregroundActivity
+            var activity = application.android.foregroundActivity || application.android.startActivity;
 
-            var builder = new com.facebook.share.model.SharePhotoContent().Builder()
+            var builder = new com.facebook.share.model.SharePhotoContent.Builder()
             var photos = []
 
             for(var i in args.list){
@@ -307,7 +306,7 @@ var Facebook = function(){
 
             var self = this
             var request = com.facebook.GraphRequest.newGraphPathRequest(accessToken, graphPath, new com.facebook.GraphRequest.Callback({
-                onCompleted: function(graphResponse) {
+                onCompleted: function(graphResponse){
 
                     if(graphResponse.getError()){
                         self.handlerError(graphResponse.getError())
@@ -354,11 +353,15 @@ var Facebook = function(){
             return false
         }        
     }
+
+    Facebook.canInvite = function(){
+        return com.facebook.share.widget.AppInviteDialog.canShow()       
+    }    
     
     return Facebook
 }
 
-function toJson(entity){
+function toJson(entity)  {
 
     var keys = entity.keys()
     var json = {}
@@ -381,7 +384,7 @@ function toJson(entity){
     return json
 }
 
-function toJsonrray(entities){
+function toJsonrray(entities) {
 
     var jsonArray = []
 
