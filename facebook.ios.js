@@ -322,7 +322,7 @@ var Facebook = function(){
         return new MySharingDelegate()
     }
     
-    Facebook.prototype.invite = function(args) {
+    Facebook.invite = function(args) {
         
         var content = FBSDKAppInviteContent.alloc().init();
         content.appLinkURL = NSURL.URLWithString(NSString.stringWithString(args.appLinkUrl));
@@ -337,7 +337,7 @@ var Facebook = function(){
 
     };
 
-    Facebook.prototype.createInviteDelegate = function() {
+    Facebook.createInviteDelegate = function() {
         var self = this
         var MyInviteDelegate = UIResponder.extend({
           appInviteDialogDidCompleteWithResults: function(appInviteDialog, results) {
@@ -354,7 +354,7 @@ var Facebook = function(){
           protocols: [FBSDKAppInviteDialogDelegate]
         });
         return new MyInviteDelegate();
-    };    
+    };
     
     return Facebook
 
