@@ -1,16 +1,31 @@
 var application = require("application");
 
+var _debug = false
+
+function debug(text){
+    if(_debug)
+        console.log("DEBUG Facebook say: " + text)
+}
+
 var Facebook = function(){
 
     var default_permissions = ["public_profile", "email"]
     var default_fileds = "id,name,email"
+
+    Facebook.setDebug = function(debug){
+        _debug = debug
+    }
 
     Facebook.logInWithPublishPermissions = function(permissions) {
         if (this._isInit) {
 
             var self = this
             application.android.on("activityResult", function(eventData) {
-                self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+                
+                if(com.facebook.FacebookSdk.isFacebookRequestCode(eventData.requestCode))
+                    self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+                else
+                    debug("request code not is facebook request code: " + eventData.requestCode)
             })
 
             var javaPermissions = java.util.Arrays.asList(permissions || default_permissions);
@@ -26,7 +41,10 @@ var Facebook = function(){
             var self = this
 
             application.android.on("activityResult", function(eventData) {
-                self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+                if(com.facebook.FacebookSdk.isFacebookRequestCode(eventData.requestCode))
+                    self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+                else
+                    debug("request code not is facebook request code: " + eventData.requestCode)
             })
 
             var javaPermissions = java.util.Arrays.asList(permissions || default_permissions);
@@ -57,7 +75,7 @@ var Facebook = function(){
         try {
             com.facebook.FacebookSdk.sdkInitialize(application.android.context.getApplicationContext());
         }catch (error) {
-            console.log("nativescript-facebook-login: The plugin could not find the android library, try to clean the android platform. " + error);
+            debug("nativescript-facebook-login: The plugin could not find the android library, try to clean the android platform. " + error);
         }
 
         this.mCallbackManager = com.facebook.CallbackManager.Factory.create();
@@ -86,12 +104,15 @@ var Facebook = function(){
 
             this.loginManager.registerCallback(this.mCallbackManager, new com.facebook.FacebookCallback({
                 onSuccess: function (result) {
+                    debug("###### FACEBOOK SUCCESS")
                     self._successCallback(result);
                 },
                 onCancel: function () {
+                    debug("###### FACEBOOK CANCEL")
                     self._cancelCallback();
                 },
                 onError: function (e) {
+                    debug("###### FACEBOOK ERROR: " + e)
                     self._failCallback(e);
                 }
             }));
@@ -176,7 +197,7 @@ var Facebook = function(){
     //url, title, content, imageUrl
     Facebook.share = function(params){
         try{
-            var activity = application.android.foregroundActivity || application.android.startActivity;
+            
             var builder = new com.facebook.share.model.ShareLinkContent.Builder()
 
             if(params.url)
@@ -193,7 +214,8 @@ var Facebook = function(){
 
             var content = builder.build();
 
-            com.facebook.share.widget.ShareDialog.show(activity, content)
+            this.shareContent(context, params)
+
         }catch(error){
             console.log(error)
             this._failCallback(error)
@@ -203,29 +225,65 @@ var Facebook = function(){
     // imagePath, content, imageUrl
     Facebook.sharePhoto = function(params){
         try{
-            var activity = application.android.foregroundActivity || application.android.startActivity;
 
             var builder = new com.facebook.share.model.SharePhotoContent.Builder()
             var photo = this.createPhotoShare(params)
             var content = builder.addPhoto(photo).build();
 
-            com.facebook.share.widget.ShareDialog.show(activity, content)
+            this.shareContent(content, params)
+
         }catch(error){
             console.log(error)
             this._failCallback(error)
         }
     }
 
+    Facebook.shareContent = function(content, params) {
+
+        var self = this
+        var activity = application.android.foregroundActivity || application.android.startActivity;
+
+        application.android.on("activityResult", function(eventData) {
+            
+            if(com.facebook.FacebookSdk.isFacebookRequestCode(eventData.requestCode))
+                self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
+            else
+                debug("request code not is facebook request code: " + eventData.requestCode)
+        })
+
+        var shareDialog = new com.facebook.share.widget.ShareDialog(activity);
+
+        var shareCallback = new com.facebook.FacebookCallback({
+            onSuccess: function (result) {
+                debug("###### FACEBOOK DIALOG SUCCESS")
+                if(params && params.success)
+                    params.success()
+            },
+            onCancel: function () {
+                debug("###### FACEBOOK DIALOG CANCEL")
+                if(params && params.cancel)
+                    params.cancel()
+            },
+            onError: function (e) {
+                debug("###### FACEBOOK DIALOG ERROR: " + e)
+                if(params && params.error)
+                    params.error(e)
+            }
+        })
+
+        shareDialog.registerCallback(this.mCallbackManager, shareCallback);
+        shareDialog.show(content)        
+    }
+
     // list of {imagePath, content, imageUrl}
-    Facebook.sharePhotos = function(args){
+    Facebook.sharePhotos = function(params){
         try{
-            var activity = application.android.foregroundActivity || application.android.startActivity;
 
             var builder = new com.facebook.share.model.SharePhotoContent.Builder()
             var photos = []
 
-            for(var i in args.list){
-                photos.push(this.createPhotoShare(args.list[i]))
+            for(var i in params.list){
+                photos.push(this.createPhotoShare(params.list[i]))
             }
 
             for(var i in photos)
@@ -233,7 +291,8 @@ var Facebook = function(){
 
             var content = builder.build();
 
-            com.facebook.share.widget.ShareDialog.show(activity, content)
+            this.shareContent(content, params)
+            
         }catch(error){
             console.log(error)
             this._failCallback(error)
@@ -356,6 +415,24 @@ var Facebook = function(){
 
     Facebook.canInvite = function(){
         return com.facebook.share.widget.AppInviteDialog.canShow()       
+    }    
+
+    Facebook.isInstalled = function(){
+        return isPackageExisted("com.facebook.orca") || isPackageExisted("com.facebook.katana") || isPackageExisted("com.facebook.android")
+    }    
+
+    function isPackageExisted(targetPackage) {
+
+        packageManager = application.android.currentContext.getPackageManager()
+        
+        try {
+            var info = packageManager.getPackageInfo(targetPackage, android.content.pm.PackageManager.GET_META_DATA);
+        } catch (e) {
+            debug("error on get installed packege " + targetPackage + ": " + e)
+            return false
+        }
+
+        return true
     }    
     
     return Facebook
