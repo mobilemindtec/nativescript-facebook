@@ -322,47 +322,39 @@ var Facebook = function(){
         return new MySharingDelegate()
     }
     
-    Facebook.invite = function(args){
+    Facebook.invite = function(args) {
+        
+        var content = FBSDKAppInviteContent.alloc().init();
+        content.appLinkURL = NSURL.URLWithString(NSString.stringWithString(args.appLinkUrl));
 
-        var content = FBSDKAppInviteContent.alloc().init()
+        content.appInvitePreviewImageURL = NSURL.URLWithString(NSString.stringWithString(args.previewImageUrl));
 
-        content.appLinkURL = NSURL.URLWithString(args.appLinkUrl)
-        //optionally set previewImageURL
-        content.appInvitePreviewImageURL = NSURL.URLWithString(args.previewImageUrl)
+        var view = application.ios.rootController;
 
-        // Present the dialog. Assumes self is a view controller
-        // which implements the protocol `FBSDKAppInviteDialogDelegate`.
-        var view = application.ios.rootController
-        var mydelegate = this.createInviteDelegate()        
-        FBSDKAppInviteDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate)
+        var mydelegate = this.createInviteDelegate();
 
-    }
+        FBSDKAppInviteDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate);
 
-    Facebook.createInviteDelegate = function(){
+    };
+
+    Facebook.createInviteDelegate = function() {
         var self = this
-        var MyInviteDelegate = (function (_super) {
-            __extends(MyInviteDelegate, _super);
-            function MySharingDelegate() {
-                _super.apply(this, arguments);
-            }
-            MyInviteDelegate.prototype.appInviteDialogDidCompleteWithResults = function (appInviteDialog, results) {
-                console.log("## delegate sharerDidCompleteWithResults")
-            };
-            MyInviteDelegate.prototype.appInviteDialogDidFailWithError = function (appInviteDialog, error) {
-                console.log("## delegate sharerDidFailWithError " + error)
-                if (self._failCallback)
-                    self._failCallback(error)
-            };
+        var MyInviteDelegate = UIResponder.extend({
+          appInviteDialogDidCompleteWithResults: function(appInviteDialog, results) {
+            console.log("## delegate sharerDidCompleteWithResults");
+          },
+          appInviteDialogDidFailWithError: function(appInviteDialog, error) {
+            console.log("## delegate sharerDidFailWithError " + error);
 
-
-            MyInviteDelegate.ObjCProtocols = [FBSDKAppInviteDialogDelegate];
-
-            return MyInviteDelegate;
-
-        }(UIResponder));
-
-        return new MyInviteDelegate()
-    }
+            if (self._failCallback)
+                self._failCallback(error)
+          }
+        }, {
+          name: "MyInviteDelegate",
+          protocols: [FBSDKAppInviteDialogDelegate]
+        });
+        return new MyInviteDelegate();
+    };
     
     return Facebook
 
