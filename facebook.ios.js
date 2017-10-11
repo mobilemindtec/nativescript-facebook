@@ -1,9 +1,19 @@
 var application = require('application')
 
+var _debug = false
+
+function debug(text){
+    if(_debug)
+        console.log("DEBUG Facebook say: " + text)
+}
 var Facebook = function(){
 
     var default_permissions = ["public_profile", "email"]
     var default_fileds = "id,name,email"
+
+    Facebook.setDebug = function(debug){
+        _debug = debug
+    }
 
     Facebook.logInWithPublishPermissions = function(permissions){
         if(this._isInit){
@@ -159,7 +169,7 @@ var Facebook = function(){
 
             var view = application.ios.rootController
 
-            var mydelegate = this.createSharingDelegate()
+            var mydelegate = this.createSharingDelegate(params)
 
             FBSDKShareDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate);
         }catch(error){
@@ -184,7 +194,7 @@ var Facebook = function(){
             var view = application.ios.rootController
 
 
-            var mydelegate = this.createSharingDelegate()
+            var mydelegate = this.createSharingDelegate(args)
 
             FBSDKShareDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate);
 
@@ -216,7 +226,7 @@ var Facebook = function(){
 
           var view = application.ios.rootController
 
-          var mydelegate = this.createSharingDelegate()
+          var mydelegate = this.createSharingDelegate(args)
           FBSDKShareDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate);
 
         }catch(error){
@@ -295,22 +305,38 @@ var Facebook = function(){
         this._failCallback(message);
     }
 
-    Facebook.createSharingDelegate = function(){
+    Facebook.createSharingDelegate = function(params){
         var self = this
         var MySharingDelegate = (function (_super) {
             __extends(MySharingDelegate, _super);
+            
             function MySharingDelegate() {
                 _super.apply(this, arguments);
             }
+
             MySharingDelegate.prototype.sharerDidCompleteWithResults = function (sharer, results) {
-                console.log("## delegate sharerDidCompleteWithResults")
+                
+                debug("###### FACEBOOK DIALOG SUCCESS")
+                if(params && params.success)
+                    params.success()
+
+
             };
+
             MySharingDelegate.prototype.sharerDidFailWithError = function (sharer, error) {
-                console.log("## delegate sharerDidFailWithError " + error)
-                self._failCallback(error)
+
+                debug("###### FACEBOOK DIALOG ERROR: " + e)
+                if(params && params.error)
+                    params.error(e)
+
             };
+
             MySharingDelegate.prototype.sharerDidCancel = function (sharer) {
-                console.log("## delegate sharerDidCancel")
+
+                debug("###### FACEBOOK DIALOG CANCEL")
+                if(params && params.cancel)
+                    params.cancel()
+
             };
 
             MySharingDelegate.ObjCProtocols = [FBSDKSharingDelegate];
@@ -336,6 +362,10 @@ var Facebook = function(){
         FBSDKAppInviteDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate);
 
     };
+
+    Facebook.canInvite = function(){
+        return FBSDKAppInviteDialog.canShow()       
+    }    
 
     Facebook.createInviteDelegate = function() {
         var self = this
