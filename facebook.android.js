@@ -214,7 +214,7 @@ var Facebook = function(){
 
             var content = builder.build();
 
-            this.shareContent(context, params)
+            this.shareContent(application.android.context, params)
 
         }catch(error){
             console.log(error)
