@@ -101,7 +101,6 @@ var Facebook = function(){
         if (this._isInit) {
             var self = this
             this._act = application.android.foregroundActivity || application.android.startActivity;
-            this.loginManager.unregisterCallback(this.mCallbackManager)
             this.loginManager.registerCallback(this.mCallbackManager, new com.facebook.FacebookCallback({
                 onSuccess: function (result) {
                     debug("###### FACEBOOK SUCCESS")
