@@ -95,12 +95,21 @@ var Facebook = function(){
 
         args = args || { fields: default_fileds }
 
+        var that = this
+
         this.doMeRequest({
             bundle: {
                 fields: args.fields || { fields: default_fileds }
             },
             callback: function(result){
-                args.callback(toJson(result))
+                var json = toJson(result)
+                var accessToken = that.getAccessToken()
+                
+                if(accessToken){
+                    json.token = accessToken.tokenString
+                }
+
+                args.callback(json)
             }
         })
     }
