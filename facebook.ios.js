@@ -36,7 +36,7 @@ var Facebook = function(){
         return this.getAccessToken() != null
     }
 
-    Facebook.logOut = function(){
+    Facebook.logout = function(){
         this.loginManager.logOut();
     }
 
