@@ -37,8 +37,7 @@ var Facebook = function(){
     }
 
     Facebook.logOut = function(){
-        if(this._init)
-            this.loginManager.logOut();
+        this.loginManager.logOut();
     }
 
     Facebook.initSdk = function(loginBehavior){
