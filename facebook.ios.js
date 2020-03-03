@@ -36,9 +36,8 @@ var Facebook = function(){
         return this.getAccessToken() != null
     }
 
-    Facebook.logOut = function(){
-        if(this._init)
-            this.loginManager.logOut();
+    Facebook.logout = function(){
+        this.loginManager.logOut();
     }
 
     Facebook.initSdk = function(loginBehavior){
