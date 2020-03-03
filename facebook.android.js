@@ -48,7 +48,7 @@ var Facebook = function(){
             })
 
             var javaPermissions = java.util.Arrays.asList(permissions || default_permissions);
-            this.loginManager.logInWithReadPermissions(application.android.currentContext, javaPermissions);
+            this.loginManager.logInWithReadPermissions((application.android.foregroundActivity || application.android.startActivity), javaPermissions);
         }
     }
 
@@ -405,7 +405,7 @@ var Facebook = function(){
                         .setApplinkUrl(args.appLinkUrl)
                         .setPreviewImageUrl(args.previewImageUrl)
                         .build();
-            com.facebook.share.widget.AppInviteDialog.show(application.android.currentContext, content);
+            com.facebook.share.widget.AppInviteDialog.show((application.android.foregroundActivity || application.android.startActivity), content);
             return true
         }else{
             return false
@@ -422,7 +422,7 @@ var Facebook = function(){
 
     function isPackageExisted(targetPackage) {
 
-        packageManager = application.android.currentContext.getPackageManager()
+        packageManager = (application.android.foregroundActivity || application.android.startActivity).getPackageManager()
         
         try {
             var info = packageManager.getPackageInfo(targetPackage, android.content.pm.PackageManager.GET_META_DATA);
