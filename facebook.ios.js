@@ -17,18 +17,18 @@ var Facebook = function(){
 
     Facebook.logInWithPublishPermissions = function(permissions){
         if(this._isInit){
-            this.loginManager.logInWithPublishPermissionsHandler(permissions || default_permissions, this._callbackManager);
+            this.loginManager.logInWithPermissionsFromViewControllerHandler(permissions || default_permissions, application.ios.rootController, this._callbackManager);
         }
     }
 
     Facebook.logInWithReadPermissions = function(permissions){
         if (this._isInit) {
-            this.loginManager.logInWithReadPermissionsHandler(permissions || default_permissions, this._callbackManager);
+            this.loginManager.logInWithPermissionsFromViewControllerHandler(permissions || default_permissions, application.ios.rootController, this._callbackManager);
         }
     }
 
     Facebook.getAccessToken = function(){
-        var accessToken = FBSDKAccessToken.currentAccessToken()
+        var accessToken = FBSDKAccessToken.currentAccessToken
         return accessToken
     }
 
@@ -43,9 +43,14 @@ var Facebook = function(){
     Facebook.initSdk = function(loginBehavior){
         this.loginManager = FBSDKLoginManager.alloc().init();
         if (this.loginManager) {
+
+            console.dir(this.loginManager)
+
             //this.loginManager.logOut();
             if (loginBehavior) {
                 this.loginManager.loginBehavior = loginBehavior;
+            }else{
+                this.loginManager.loginBehavior = FBSDKLoginBehavior.Browser
             }
             this._isInit = true;
             return true;

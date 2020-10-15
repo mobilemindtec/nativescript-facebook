@@ -1,6 +1,9 @@
-pod 'FacebookCore',  '~> 0.5.0'
-pod 'FacebookLogin', '~> 0.5.0'
-pod 'FacebookShare', '~> 0.5.0'
-pod 'FBSDKCoreKit', '~> 4.39.1'
-pod 'FBSDKLoginKit', '~> 4.39.1'
-pod 'FBSDKShareKit', '~> 4.39.1'
+#pod 'FacebookCore',  '~> 0.5.0'
+#pod 'FacebookLogin', '~> 0.5.0'
+#pod 'FacebookShare', '~> 0.5.0'
+
+pod 'FBSDKCoreKit', '~> 5.0'
+pod 'FBSDKLoginKit', '~> 5.0'
+pod 'FBSDKShareKit', '~> 5.0'
+
+# https://github.com/facebook/facebook-ios-sdk/releases
