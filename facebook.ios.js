@@ -41,22 +41,23 @@ var Facebook = function(){
     }
 
     Facebook.initSdk = function(loginBehavior){
-        this.loginManager = FBSDKLoginManager.alloc().init();
-        if (this.loginManager) {
 
-            console.dir(this.loginManager)
 
-            //this.loginManager.logOut();
-            if (loginBehavior) {
-                this.loginManager.loginBehavior = loginBehavior;
-            }else{
-                this.loginManager.loginBehavior = FBSDKLoginBehavior.Browser
+        if(!this._isInit){
+            this.loginManager = FBSDKLoginManager.alloc().init();
+            if (this.loginManager) {
+                //this.loginManager.logOut();
+                if (loginBehavior) {
+                    this.loginManager.loginBehavior = loginBehavior;
+                }else{
+                    this.loginManager.loginBehavior = FBSDKLoginBehavior.Browser
+                }
+                this._isInit = true;
+                return true;
             }
-            this._isInit = true;
-            return true;
-        }
-        else {
-            return false;
+            else {
+                return false;
+            }
         }
     }
 
