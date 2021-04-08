@@ -1,4 +1,4 @@
-var application = require("application");
+import { Application } from "@nativescript/core"
 
 var _debug = false
 
@@ -20,7 +20,7 @@ var Facebook = function(){
         if (this._isInit) {
 
             var self = this
-            application.android.on("activityResult", function(eventData) {
+            Application.android.on("activityResult", function(eventData) {
                 
                 if(com.facebook.FacebookSdk.isFacebookRequestCode(eventData.requestCode))
                     self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
@@ -40,7 +40,7 @@ var Facebook = function(){
 
             var self = this
 
-            application.android.on("activityResult", function(eventData) {
+            Application.android.on("activityResult", function(eventData) {
                 if(com.facebook.FacebookSdk.isFacebookRequestCode(eventData.requestCode))
                     self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
                 else
@@ -48,7 +48,7 @@ var Facebook = function(){
             })
 
             var javaPermissions = java.util.Arrays.asList(permissions || default_permissions);
-            this.loginManager.logInWithReadPermissions((application.android.foregroundActivity || application.android.startActivity), javaPermissions);
+            this.loginManager.logInWithReadPermissions((Application.android.foregroundActivity || Application.android.startActivity), javaPermissions);
         }
     }
 
@@ -73,7 +73,7 @@ var Facebook = function(){
             return true
 
         try {
-            com.facebook.FacebookSdk.sdkInitialize(application.android.context.getApplicationContext());
+            com.facebook.FacebookSdk.sdkInitialize(Application.android.context.getApplicationContext());
         }catch (error) {
             debug("nativescript-facebook-login: The plugin could not find the android library, try to clean the android platform. " + error);
         }
@@ -100,7 +100,7 @@ var Facebook = function(){
 
         if (this._isInit) {
             var self = this
-            this._act = application.android.foregroundActivity || application.android.startActivity;
+            this._act = Application.android.foregroundActivity || Application.android.startActivity;
             this.loginManager.registerCallback(this.mCallbackManager, new com.facebook.FacebookCallback({
                 onSuccess: function (result) {
                     debug("###### FACEBOOK SUCCESS")
@@ -213,7 +213,7 @@ var Facebook = function(){
 
             var content = builder.build();
 
-            this.shareContent(application.android.context, params)
+            this.shareContent(Application.android.context, params)
 
         }catch(error){
             console.log(error)
@@ -240,9 +240,9 @@ var Facebook = function(){
     Facebook.shareContent = function(content, params) {
 
         var self = this
-        var activity = application.android.foregroundActivity || application.android.startActivity;
+        var activity = Application.android.foregroundActivity || Application.android.startActivity;
 
-        application.android.on("activityResult", function(eventData) {
+        Application.android.on("activityResult", function(eventData) {
             
             if(com.facebook.FacebookSdk.isFacebookRequestCode(eventData.requestCode))
                 self.mCallbackManager.onActivityResult(eventData.requestCode, eventData.resultCode, eventData.intent);
@@ -405,7 +405,7 @@ var Facebook = function(){
                         .setApplinkUrl(args.appLinkUrl)
                         .setPreviewImageUrl(args.previewImageUrl)
                         .build();
-            com.facebook.share.widget.AppInviteDialog.show((application.android.foregroundActivity || application.android.startActivity), content);
+            com.facebook.share.widget.AppInviteDialog.show((Application.android.foregroundActivity || Application.android.startActivity), content);
             return true
         }else{
             return false
@@ -422,7 +422,7 @@ var Facebook = function(){
 
     function isPackageExisted(targetPackage) {
 
-        packageManager = (application.android.foregroundActivity || application.android.startActivity).getPackageManager()
+        packageManager = (Application.android.foregroundActivity || Application.android.startActivity).getPackageManager()
         
         try {
             var info = packageManager.getPackageInfo(targetPackage, android.content.pm.PackageManager.GET_META_DATA);

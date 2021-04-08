@@ -1,4 +1,4 @@
-var application = require('application')
+import { Application } from "@nativescript/core"
 
 var _debug = false
 
@@ -17,13 +17,13 @@ var Facebook = function(){
 
     Facebook.logInWithPublishPermissions = function(permissions){
         if(this._isInit){
-            this.loginManager.logInWithPermissionsFromViewControllerHandler(permissions || default_permissions, application.ios.rootController, this._callbackManager);
+            this.loginManager.logInWithPermissionsFromViewControllerHandler(permissions || default_permissions, Application.ios.rootController, this._callbackManager);
         }
     }
 
     Facebook.logInWithReadPermissions = function(permissions){
         if (this._isInit) {
-            this.loginManager.logInWithPermissionsFromViewControllerHandler(permissions || default_permissions, application.ios.rootController, this._callbackManager);
+            this.loginManager.logInWithPermissionsFromViewControllerHandler(permissions || default_permissions, Application.ios.rootController, this._callbackManager);
         }
     }
 
@@ -181,7 +181,7 @@ var Facebook = function(){
                 content.imageURL = NSURL.URLWithString(params.imageUrl)
             }
 
-            var view = application.ios.rootController
+            var view = Application.ios.rootController
 
             var mydelegate = this.createSharingDelegate(params)
 
@@ -205,7 +205,7 @@ var Facebook = function(){
 
             var photo = this.createPhotoShare(args)
             content.photos = [photo];
-            var view = application.ios.rootController
+            var view = Application.ios.rootController
 
 
             var mydelegate = this.createSharingDelegate(args)
@@ -238,7 +238,7 @@ var Facebook = function(){
           content.photos = photos;
 
 
-          var view = application.ios.rootController
+          var view = Application.ios.rootController
 
           var mydelegate = this.createSharingDelegate(args)
           FBSDKShareDialog.showFromViewControllerWithContentDelegate(view, content, mydelegate);
@@ -369,7 +369,7 @@ var Facebook = function(){
 
         content.appInvitePreviewImageURL = NSURL.URLWithString(NSString.stringWithString(args.previewImageUrl));
 
-        var view = application.ios.rootController;
+        var view = Application.ios.rootController;
 
         var mydelegate = this.createInviteDelegate();
 

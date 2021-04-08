@@ -1,1 +1,1 @@
-require("utils/module-merge").merge(require("./facebook"), exports)
+export * from "./facebook"
