@@ -1,4 +1,4 @@
-import { Application } from "@nativescript/core"
+var Application = require("@nativescript/core").Application
 
 var _debug = false
 
